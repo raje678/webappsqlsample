@@ -1,0 +1,157 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "rajappserviceplanName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rajappserviceplanSkuName": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "rajsqlserverAdminLogin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rajsqlserverAdminLoginPassword": {
+      "type": "securestring"
+    },
+    "rajsqldatabaseName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rajsqldatabaseCollation": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "rajsqldatabaseEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ]
+    },
+    "rajsqldatabaseRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "S0",
+        "S1",
+        "S2",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "metadata": {
+        "description": "Describes the performance level for Edition"
+      }
+    }},
+  "variables": {
+    "rajwebappName": "[concat('rajwebapp', uniqueString(resourceGroup().id))]",
+    "rajsqlserverName": "[concat('rajsqlserver', uniqueString(resourceGroup().id))]"},
+  "resources": [
+    {
+      "name": "[parameters('rajappserviceplanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "sku": {
+        "name": "[parameters('rajappserviceplanSkuName')]"
+      },
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "rajappserviceplan"
+      },
+      "properties": {
+        "name": "[parameters('rajappserviceplanName')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[variables('rajwebappName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('rajappserviceplanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', parameters('rajappserviceplanName')))]": "Resource",
+        "displayName": "rajwebapp"
+      },
+      "properties": {
+        "name": "[variables('rajwebappName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('rajappserviceplanName'))]"
+      }
+    },
+    {
+      "name": "[variables('rajsqlserverName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01-preview",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "rajsqlserver"
+      },
+      "properties": {
+        "administratorLogin": "[parameters('rajsqlserverAdminLogin')]",
+        "administratorLoginPassword": "[parameters('rajsqlserverAdminLoginPassword')]"
+      },
+      "resources": [
+        {
+          "name": "AllowAllWindowsAzureIps",
+          "type": "firewallrules",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('rajsqlserverName'))]"
+          ],
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
+        },
+        {
+          "name": "[parameters('rajsqldatabaseName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('rajsqlserverName'))]"
+          ],
+          "tags": {
+            "displayName": "rajsqldatabase"
+          },
+          "properties": {
+            "collation": "[parameters('rajsqldatabaseCollation')]",
+            "edition": "[parameters('rajsqldatabaseEdition')]",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "[parameters('rajsqldatabaseRequestedServiceObjectiveName')]"
+          }
+        }
+      ]
+    }],
+  "outputs": {}
+}
