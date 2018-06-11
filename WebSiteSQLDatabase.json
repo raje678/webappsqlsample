@@ -160,24 +160,6 @@
             "endIpAddress": "0.0.0.0",
             "startIpAddress": "0.0.0.0"
           }
-        },
-        {
-          "name": "[parameters('plltestName')]",
-          "type": "databases",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2014-04-01-preview",
-          "dependsOn": [
-            "[resourceId('Microsoft.Sql/servers', variables('sqlserverName'))]"
-          ],
-          "tags": {
-            "displayName": "plltest"
-          },
-          "properties": {
-            "collation": "[parameters('plltestCollation')]",
-            "edition": "[parameters('plltestEdition')]",
-            "maxSizeBytes": "1073741824",
-            "requestedServiceObjectiveName": "[parameters('plltestRequestedServiceObjectiveName')]"
-          }
         }
       ]
     },
