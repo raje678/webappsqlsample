@@ -6,6 +6,14 @@
       "type": "string",
       "minLength": 1
     },
+    "website": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sqlserver": {
+      "type": "string",
+      "minLength": 1
+    },
     "skuName": {
       "type": "string",
       "defaultValue": "F1",
