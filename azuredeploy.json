@@ -59,7 +59,7 @@
     },
     "maxSizeBytes": {
       "type": "string",
-      "defaultValue": "1073741824"
+      "defaultValue": "1073"
     },
     "requestedServiceObjectiveName": {
       "type": "string",
